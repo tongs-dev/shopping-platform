@@ -6,20 +6,20 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/micro/go-micro/v2"
 	"log"
-	"os"
-	"shopping-platform/common/domain/repository"
-	"shopping-platform/common/domain/service"
-	"shopping-platform/common/handler"
-	userpb "shopping-platform/common/proto/user"
+	"shopping-platform/user/domain/repository"
+	"shopping-platform/user/domain/service"
+	"shopping-platform/user/handler"
+	userpb "shopping-platform/user/proto/user"
+	"shopping-platform/user/util"
 )
 
 func main() {
 	// Read environment variables for database config
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
+	dbHost := util.GetEnv("DB_HOST", "localhost")
+	dbPort := util.GetEnv("DB_PORT", "3306")
+	dbUser := util.GetEnv("DB_USER", "root")
+	dbPassword := util.GetEnv("DB_PASSWORD", "123456")
+	dbName := util.GetEnv("DB_NAME", "micro")
 
 	// MySQL's connection string
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",

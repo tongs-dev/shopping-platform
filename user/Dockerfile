@@ -1,32 +1,26 @@
-# Use official Golang image
-FROM golang:1.20 as builder
+# Use Go as the base image
+FROM golang:1.24 AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy the Go modules files
-COPY go.mod go.sum ./
+# Copy the entire monorepo to the container
+COPY . /app/user
 
-# Download dependencies
+# Set Go module path for the user service
+WORKDIR /app/user
+
+# Ensure modules are linked properly
 RUN go mod tidy
 
-# Copy the source code
-COPY . .
+# Build the user service binary
+RUN go build -o user-service .
 
-# Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o user-service .
-
-# Use a minimal base image for production
+# Use a lightweight image for runtime
 FROM alpine:latest
-
-# Set the working directory
 WORKDIR /root/
+COPY --from=builder /app/user/user-service .
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /app/user-service .
-
-# Expose the service port (change if needed)
+# Expose port and run the application
 EXPOSE 8080
-
-# Start the application
 CMD ["./user-service"]

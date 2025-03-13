@@ -63,34 +63,40 @@ go mod tidy
 
 3. Start MySQL & User Service using Docker
 ```shell
-docker-compose up -d
+make docker-start
 ```
 This will start MySQL and the User Service.
+
+4. Stop docker containers
+```shell
+make docker-stop
+```
 
 ## Running the Service
 
 1. Locally (without Docker)
 ```shell
+docker-compose up -d mysql
 go run main.go
 ```
 
 2. Inside Docker
 ```shell
-docker build -t user-service .
-docker run -p 8080:8080 user-service
+make docker-build
+make docker-start
 ```
 
 ## Running Tests
 
 1. Unit Tests
 ```shell
-go test ./...
+make test
 ```
 
 2. Integration Tests (with MySQL in Docker)
 ```shell
-docker-compose up -d
-GO_ENV=test go test -v ./...
+make docker-run
+make test
 ```
 
 ## Development Guidelines
@@ -99,9 +105,13 @@ GO_ENV=test go test -v ./...
 If you update the user.proto file, regenerate the gRPC files:
 
 ```shell
-protoc --proto_path=./proto/user \
---go_out=./ --go-grpc_out=./ --micro_out=./ \
-./proto/user/user.proto
+# Install go micro and required plugins 
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+go install github.com/micro/micro/v2/cmd/protoc-gen-micro@latest
+
+# Generate go code from protobuf
+make proto
 ```
 
 

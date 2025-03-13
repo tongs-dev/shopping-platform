@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/jinzhu/gorm"
-	"shopping-platform/common/domain/model"
+	"shopping-platform/user/domain/model"
 )
 
 // IUserRepository defines the contract for user-related database operations.

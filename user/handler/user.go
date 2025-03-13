@@ -4,9 +4,9 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"shopping-platform/common/domain/model"
-	"shopping-platform/common/domain/service"
-	userpb "shopping-platform/common/proto/user"
+	"shopping-platform/user/domain/model"
+	"shopping-platform/user/domain/service"
+	userpb "shopping-platform/user/proto/user"
 )
 
 // User is the gRPC service handler for user-related operations.

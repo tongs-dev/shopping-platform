@@ -1,5 +1,6 @@
 # Define variables
 GOPATH := $(shell go env GOPATH)
+BINARY_NAME = user-service
 
 .PHONY: proto
 proto:
@@ -17,9 +18,17 @@ release:
 test:
 	go test -v ./... -cover
 
-.PHONY: dockerBuild
-dockerBuild:
+.PHONY: docker-build
+docker-build:
 	docker build -t $(BINARY_NAME):latest .
+
+.PHONY: docker-start
+docker-start:
+	docker-compose up -d
+
+.PHONY: docker-stop
+docker-stop:
+	docker-compose down -v
 
 .PHONY: clean
 clean:

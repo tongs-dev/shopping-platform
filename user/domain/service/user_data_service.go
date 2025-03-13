@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"shopping-platform/common/domain/model"
-	"shopping-platform/common/domain/repository"
+	"shopping-platform/user/domain/model"
+	"shopping-platform/user/domain/repository"
 )
 
 // IUserDataService defines the contract for user-related operations.
