@@ -1,4 +1,4 @@
-package main
+package category
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"

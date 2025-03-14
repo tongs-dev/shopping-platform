@@ -2,11 +2,10 @@ package service
 
 import (
 	"errors"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 	"github.com/tongs-dev/shopping-platform/category/domain/model"
+	"testing"
 )
 
 // MockCategoryRepository is a mock type for the ICategoryRepository interface
@@ -67,94 +66,94 @@ func newCategoryService() (*MockCategoryRepository, ICategoryService) {
 	return mockRepo, service
 }
 
-// TestCategoryService tests the CategoryService
-func TestCategoryService(t *testing.T) {
+// CategoryServiceTestSuite is the test suite for CategoryService
+type CategoryServiceTestSuite struct {
+	suite.Suite
+	mockRepo *MockCategoryRepository
+	service  ICategoryService
+}
 
-	t.Run("TestCategoryService", func(t *testing.T) {
-		// Each subtest gets its own fresh mock and service
-		mockRepo, service := newCategoryService()
+// SetupTest runs before each test
+func (suite *CategoryServiceTestSuite) SetupTest() {
+	suite.T().Logf("Setup Test")
+	suite.mockRepo, suite.service = newCategoryService()
+}
 
-		// Ensure cleanup after each subtest to reset expectations
-		t.Cleanup(func() {
-			mockRepo.AssertExpectations(t)
-		})
+// TestCreateCategory tests the CreateCategory method of CategoryService
+func (suite *CategoryServiceTestSuite) TestCreateCategory() {
+	category := &model.Category{CategoryName: "Test Category"}
+	suite.mockRepo.On("CreateCategory", category).Return(int64(1), nil)
 
-		t.Run("AddCategory", func(t *testing.T) {
-			category := &model.Category{CategoryName: "Test Category"}
-			mockRepo.On("CreateCategory", category).Return(int64(1), nil)
+	userID, err := suite.service.AddCategory(category)
 
-			userID, err := service.AddCategory(category)
-			assert.NoError(t, err)
-			assert.Equal(t, int64(1), userID)
-		})
+	suite.NoError(err)
+	suite.Equal(int64(1), userID)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
 
-		t.Run("DeleteCategory", func(t *testing.T) {
-			categoryID := int64(1)
-			mockRepo.On("DeleteCategoryByID", categoryID).Return(nil)
+// TestDeleteCategory tests the DeleteCategory method of CategoryService
+func (suite *CategoryServiceTestSuite) TestDeleteCategory() {
+	categoryID := int64(1)
+	suite.mockRepo.On("DeleteCategoryByID", categoryID).Return(nil)
 
-			err := service.DeleteCategory(categoryID)
-			assert.NoError(t, err)
-		})
+	err := suite.service.DeleteCategory(categoryID)
 
-		t.Run("UpdateCategory", func(t *testing.T) {
-			category := &model.Category{ID: 1, CategoryName: "Updated Category"}
-			mockRepo.On("UpdateCategory", category).Return(nil)
+	suite.NoError(err)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
 
-			err := service.UpdateCategory(category)
-			assert.NoError(t, err)
-		})
+// TestUpdateCategory tests the UpdateCategory method of CategoryService
+func (suite *CategoryServiceTestSuite) TestUpdateCategory() {
+	category := &model.Category{ID: 1, CategoryName: "Updated Category"}
+	suite.mockRepo.On("UpdateCategory", category).Return(nil)
 
-		t.Run("FindCategoryByID", func(t *testing.T) {
-			categoryID := int64(1)
-			expectedCategory := &model.Category{ID: categoryID, CategoryName: "Test Category"}
-			mockRepo.On("FindCategoryByID", categoryID).Return(expectedCategory, nil)
+	err := suite.service.UpdateCategory(category)
 
-			category, err := service.FindCategoryByID(categoryID)
-			assert.NoError(t, err)
-			assert.Equal(t, expectedCategory, category)
-		})
+	suite.NoError(err)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
 
-		t.Run("FindAllCategory", func(t *testing.T) {
-			expectedCategories := []model.Category{
-				{ID: 1, CategoryName: "Category 1"},
-				{ID: 2, CategoryName: "Category 2"},
-			}
-			mockRepo.On("FindAll").Return(expectedCategories, nil)
+// TestFindCategoryByID tests the FindCategoryByID method of CategoryService
+func (suite *CategoryServiceTestSuite) TestFindCategoryByID() {
+	categoryID := int64(1)
+	expectedCategory := &model.Category{ID: categoryID, CategoryName: "Test Category"}
+	suite.mockRepo.On("FindCategoryByID", categoryID).Return(expectedCategory, nil)
 
-			categories, err := service.FindAllCategory()
-			assert.NoError(t, err)
-			assert.Equal(t, expectedCategories, categories)
-		})
+	category, err := suite.service.FindCategoryByID(categoryID)
 
-		t.Run("FindCategoryByName", func(t *testing.T) {
-			categoryName := "Test Category"
-			expectedCategory := &model.Category{ID: 1, CategoryName: categoryName}
-			mockRepo.On("FindCategoryByName", categoryName).Return(expectedCategory, nil)
+	suite.NoError(err)
+	suite.Equal(expectedCategory, category)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
 
-			category, err := service.FindCategoryByName(categoryName)
-			assert.NoError(t, err)
-			assert.Equal(t, expectedCategory, category)
-		})
-	})
+// TestFindAllCategory tests the FindAllCategory method of CategoryService
+func (suite *CategoryServiceTestSuite) TestFindAllCategory() {
+	expectedCategories := []model.Category{
+		{ID: 1, CategoryName: "Category 1"},
+		{ID: 2, CategoryName: "Category 2"},
+	}
+	suite.mockRepo.On("FindAll").Return(expectedCategories, nil)
 
-	t.Run("Error Handling", func(t *testing.T) {
-		// Each subtest gets its own fresh mock and service
-		mockRepo, service := newCategoryService()
+	categories, err := suite.service.FindAllCategory()
 
-		// Ensure cleanup after each subtest to reset expectations
-		t.Cleanup(func() {
-			mockRepo.AssertExpectations(t)
-		})
+	suite.NoError(err)
+	suite.Equal(expectedCategories, categories)
+	suite.mockRepo.AssertExpectations(suite.T())
+}
 
-		// Prepare the mock to return an error when CreateCategory is called
-		category := &model.Category{CategoryName: "Test Category"}
-		mockRepo.On("CreateCategory", category).Return(int64(0), errors.New("database error"))
+// TestErrorHandling tests error scenarios in the service methods
+func (suite *CategoryServiceTestSuite) TestErrorHandling() {
+	category := &model.Category{CategoryName: "Test Category"}
+	suite.mockRepo.On("CreateCategory", category).Return(int64(0), errors.New("database error"))
 
-		// Call AddCategory, which should propagate the error
-		_, err := service.AddCategory(category)
+	_, err := suite.service.AddCategory(category)
 
-		// Verify the error is returned correctly
-		assert.Error(t, err)
-		assert.Equal(t, "database error", err.Error())
-	})
+	suite.Error(err)
+	suite.Equal("database error", err.Error())
+	suite.mockRepo.AssertExpectations(suite.T())
+}
+
+// Run the tests
+func TestCategoryServiceTestSuite(t *testing.T) {
+	suite.Run(t, new(CategoryServiceTestSuite))
 }

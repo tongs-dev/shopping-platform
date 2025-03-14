@@ -1,6 +1,6 @@
 module github.com/tongs-dev/shopping-platform/category
 
-go 1.24.1
+go 1.20
 
 require (
 	github.com/golang/protobuf v1.4.0
