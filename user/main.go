@@ -5,12 +5,12 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/micro/go-micro/v2"
+	"github.com/tongs-dev/shopping-platform/user/domain/repository"
+	"github.com/tongs-dev/shopping-platform/user/domain/service"
+	"github.com/tongs-dev/shopping-platform/user/handler"
+	userpb "github.com/tongs-dev/shopping-platform/user/proto/user"
+	"github.com/tongs-dev/shopping-platform/user/util"
 	"log"
-	"shopping-platform/user/domain/repository"
-	"shopping-platform/user/domain/service"
-	"shopping-platform/user/handler"
-	userpb "shopping-platform/user/proto/user"
-	"shopping-platform/user/util"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	dbPort := util.GetEnv("DB_PORT", "3306")
 	dbUser := util.GetEnv("DB_USER", "root")
 	dbPassword := util.GetEnv("DB_PASSWORD", "123456")
-	dbName := util.GetEnv("DB_NAME", "micro")
+	dbName := util.GetEnv("DB_NAME", "userdb")
 
 	// MySQL's connection string
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",

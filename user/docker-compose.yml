@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: micro
+      MYSQL_DATABASE: userdb
     ports:
       - "3306:3306"
     volumes:
@@ -24,7 +24,7 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: 123456
-      DB_NAME: micro
+      DB_NAME: userdb
     ports:
       - "8080:8080"
 

@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
+	"github.com/tongs-dev/shopping-platform/user/domain/model"
+	"github.com/tongs-dev/shopping-platform/user/domain/repository"
 	"golang.org/x/crypto/bcrypt"
-	"shopping-platform/user/domain/model"
-	"shopping-platform/user/domain/repository"
 )
 
 // IUserDataService defines the contract for user-related operations.

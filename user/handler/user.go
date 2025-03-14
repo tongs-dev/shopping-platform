@@ -2,11 +2,11 @@ package handler
 
 import (
 	"context"
+	"github.com/tongs-dev/shopping-platform/user/domain/model"
+	"github.com/tongs-dev/shopping-platform/user/domain/service"
+	userpb "github.com/tongs-dev/shopping-platform/user/proto/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"shopping-platform/user/domain/model"
-	"shopping-platform/user/domain/service"
-	userpb "shopping-platform/user/proto/user"
 )
 
 // User is the gRPC service handler for user-related operations.

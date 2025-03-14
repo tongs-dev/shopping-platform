@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"shopping-platform/user/domain/model"
+	"github.com/tongs-dev/shopping-platform/user/domain/model"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql" // Import MySQL dialect
@@ -14,7 +14,7 @@ import (
 
 // setupTestDB initializes a real MySQL test database for unit tests.
 func setupTestDB(t *testing.T) *gorm.DB {
-	dsn := "root:123456@tcp(localhost:3306)/micro?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(localhost:3306)/userdb?charset=utf8mb4&parseTime=True&loc=Local"
 
 	// Opens MySQL connection
 	db, err := gorm.Open("mysql", dsn)

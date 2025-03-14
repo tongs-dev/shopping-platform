@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"shopping-platform/user/domain/model"
+	"github.com/tongs-dev/shopping-platform/user/domain/model"
 )
 
 // MockUserRepository is a mock implementation of IUserRepository.
