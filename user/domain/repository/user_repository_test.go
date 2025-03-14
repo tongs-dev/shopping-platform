@@ -3,14 +3,102 @@ package repository
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"testing"
-
-	"github.com/tongs-dev/shopping-platform/user/domain/model"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql" // Import MySQL dialect
 	"github.com/stretchr/testify/assert"
+	"github.com/tongs-dev/shopping-platform/user/domain/model"
 )
+
+// TestUserRepository contains all the unit tests for the UserRepository.
+func TestUserRepository(t *testing.T) {
+	// Initializes database and repository
+	db := setupTestDB(t)
+	repo := &UserRepository{mysqlDb: db}
+
+	t.Run("CreateUser", func(t *testing.T) {
+		user := &model.User{
+			UserName:  generateRandomString(5),
+			FirstName: generateRandomString(5),
+		}
+
+		userID, err := repo.CreateUser(user)
+		assert.NoError(t, err)
+		assert.NotZero(t, userID, "User ID should not be zero")
+	})
+
+	t.Run("FindUserByName", func(t *testing.T) {
+		userName := generateRandomString(5)
+		user := &model.User{UserName: userName, FirstName: "John"}
+		_, err := repo.CreateUser(user)
+		assert.NoError(t, err, "Failed to create user")
+
+		foundUser, err := repo.FindUserByName(userName)
+		assert.NoError(t, err)
+		assert.Equal(t, userName, foundUser.UserName)
+	})
+
+	t.Run("FindUserByID", func(t *testing.T) {
+		user := &model.User{UserName: generateRandomString(5), FirstName: "John"}
+		userID, _ := repo.CreateUser(user)
+
+		foundUser, err := repo.FindUserByID(userID)
+		assert.NoError(t, err)
+		assert.Equal(t, userID, foundUser.ID)
+	})
+
+	t.Run("UpdateUser", func(t *testing.T) {
+		user := &model.User{UserName: generateRandomString(5), FirstName: "OldName"}
+		userID, _ := repo.CreateUser(user)
+
+		user.ID = userID
+		user.FirstName = "NewName"
+		err := repo.UpdateUser(user)
+		assert.NoError(t, err, "Failed to update user")
+
+		updatedUser, _ := repo.FindUserByID(userID)
+		assert.Equal(t, "NewName", updatedUser.FirstName)
+	})
+
+	t.Run("DeleteUserByID", func(t *testing.T) {
+		user := &model.User{UserName: generateRandomString(5), FirstName: "John"}
+		userID, _ := repo.CreateUser(user)
+
+		err := repo.DeleteUserByID(userID)
+		assert.NoError(t, err, "Failed to delete user")
+
+		_, err = repo.FindUserByID(userID)
+		assert.Error(t, err, "Expected error for deleted user")
+	})
+
+	t.Run("FindAll", func(t *testing.T) {
+		clearTable(t, db)
+
+		repo.CreateUser(&model.User{UserName: generateRandomString(5), FirstName: "Alice"})
+		repo.CreateUser(&model.User{UserName: generateRandomString(5), FirstName: "Bob"})
+
+		users, err := repo.FindAll()
+		assert.NoError(t, err, "Failed to retrieve all users")
+		assert.Len(t, users, 2, "Expected 2 users")
+	})
+
+	t.Run("CreateUserWithSameUsername", func(t *testing.T) {
+		user := &model.User{UserName: generateRandomString(5), FirstName: "John"}
+		_, err := repo.CreateUser(user)
+		assert.NoError(t, err, "Failed to create user")
+
+		_, err = repo.CreateUser(user)
+		assert.Error(t, err, "Expected error for duplicate user creation")
+	})
+
+	t.Run("FindUserByNameNotFound", func(t *testing.T) {
+		_, err := repo.FindUserByName("nonexistentuser")
+		assert.Error(t, err, "Expected error for non-existent user")
+	})
+}
 
 // setupTestDB initializes a real MySQL test database for unit tests.
 func setupTestDB(t *testing.T) *gorm.DB {
@@ -22,10 +110,13 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		log.Fatalf("Failed to connect to MySQL: %v", err)
 	}
 
-	// Drops and recreates the user table for a clean test state
-	err = db.DropTableIfExists(&model.User{}).Error
-	assert.NoError(t, err, "Failed to drop test table")
+	// Clear the 'users' table before each test
+	err = db.Exec("DROP TABLE IF EXISTS users").Error
+	if err != nil {
+		log.Fatalf("Failed to drop 'users' table: %v", err)
+	}
 
+	// Automatically migrate the User model (creating the table)
 	err = db.AutoMigrate(&model.User{}).Error
 	assert.NoError(t, err, "Failed to migrate test table")
 
@@ -33,101 +124,22 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	return db
 }
 
-// TestCreateUser verifies that a user can be inserted into MySQL.
-func TestCreateUser(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
+// clearTable clears the users table before each test
+func clearTable(t *testing.T, db *gorm.DB) {
+	err := db.Exec("TRUNCATE TABLE users").Error
+	assert.NoError(t, err, "Failed to clear 'users' table")
+}
 
-	// Create test user
-	user := &model.User{
-		UserName:  "testuser",
-		FirstName: "John",
+func generateRandomString(length int) string {
+	// Create a new random source with the current Unix timestamp
+	randSource := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(randSource)
+
+	// Define the characters to use in the random string
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[r.Intn(len(charset))]
 	}
-
-	userID, err := repo.CreateUser(user)
-	assert.NoError(t, err, "Failed to create user")
-	assert.NotZero(t, userID, "User ID should not be zero")
-}
-
-// TestFindUserByName verifies retrieving a user by username.
-func TestFindUserByName(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
-
-	// Insert test user
-	user := &model.User{UserName: "testuser", FirstName: "John"}
-	repo.CreateUser(user)
-
-	// Retrieve user
-	foundUser, err := repo.FindUserByName("testuser")
-	assert.NoError(t, err, "Failed to find user")
-	assert.Equal(t, "testuser", foundUser.UserName)
-}
-
-// TestFindUserByID verifies retrieving a user by ID.
-func TestFindUserByID(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
-
-	// Insert test user
-	user := &model.User{UserName: "testuser", FirstName: "John"}
-	userID, _ := repo.CreateUser(user)
-
-	// Retrieve user by ID
-	foundUser, err := repo.FindUserByID(userID)
-	assert.NoError(t, err, "Failed to find user")
-	assert.Equal(t, userID, foundUser.ID)
-}
-
-// TestUpdateUser verifies updating an existing user.
-func TestUpdateUser(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
-
-	// Insert user
-	user := &model.User{UserName: "testuser", FirstName: "OldName"}
-	userID, _ := repo.CreateUser(user)
-
-	// Update user details
-	user.ID = userID
-	user.FirstName = "NewName"
-	err := repo.UpdateUser(user)
-	assert.NoError(t, err, "Failed to update user")
-
-	// Fetch updated user
-	updatedUser, _ := repo.FindUserByID(userID)
-	assert.Equal(t, "NewName", updatedUser.FirstName)
-}
-
-// TestDeleteUserByID verifies user deletion.
-func TestDeleteUserByID(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
-
-	// Insert user
-	user := &model.User{UserName: "testuser", FirstName: "John"}
-	userID, _ := repo.CreateUser(user)
-
-	// Delete user
-	err := repo.DeleteUserByID(userID)
-	assert.NoError(t, err, "Failed to delete user")
-
-	// Try to retrieve deleted user
-	_, err = repo.FindUserByID(userID)
-	assert.Error(t, err, "Expected error for deleted user")
-}
-
-// TestFindAll verifies retrieving all users.
-func TestFindAll(t *testing.T) {
-	db := setupTestDB(t)
-	repo := NewUserRepository(db)
-
-	// Insert multiple users
-	repo.CreateUser(&model.User{UserName: "user1", FirstName: "Alice"})
-	repo.CreateUser(&model.User{UserName: "user2", FirstName: "Bob"})
-
-	// Retrieve all users
-	users, err := repo.FindAll()
-	assert.NoError(t, err, "Failed to retrieve all users")
-	assert.Len(t, users, 2, "Expected 2 users")
+	return string(result)
 }
