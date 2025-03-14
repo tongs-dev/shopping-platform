@@ -1,4 +1,4 @@
-module shopping-platform/user
+module github.com/tongs-dev/shopping-platform/user
 
 go 1.24.1
 

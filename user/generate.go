@@ -1,2 +1,3 @@
-package main
+package user
+
 //go:generate make proto
