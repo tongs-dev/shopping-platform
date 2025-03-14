@@ -1,6 +1,6 @@
 module github.com/tongs-dev/common
 
-go 1.24
+go 1.20
 
 require (
 	github.com/micro/go-micro/v2 v2.9.1
