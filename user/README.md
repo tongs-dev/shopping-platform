@@ -95,7 +95,7 @@ make test
 
 2. Integration Tests (with MySQL in Docker)
 ```shell
-make docker-run
+make docker-start
 make test
 ```
 
