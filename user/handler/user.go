@@ -9,13 +9,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// User is the gRPC service handler for user-related operations.
-type User struct {
+// UserHandler is the gRPC service handler for user-related operations.
+type UserHandler struct {
 	UserDataService service.IUserDataService
 }
 
 // Register creates a new user account based on the provided request data.
-func (u *User) Register(ctx context.Context, userRegisterRequest *userpb.UserRegisterRequest, userRegisterResponse *userpb.UserRegisterResponse) error {
+func (u *UserHandler) Register(ctx context.Context, userRegisterRequest *userpb.UserRegisterRequest, userRegisterResponse *userpb.UserRegisterResponse) error {
 	if userRegisterRequest.UserName == "" || userRegisterRequest.Pwd == "" {
 		return status.Errorf(codes.InvalidArgument, "username and password are required")
 	}
@@ -36,7 +36,7 @@ func (u *User) Register(ctx context.Context, userRegisterRequest *userpb.UserReg
 }
 
 // Login verifies the user's credentials and returns a success response if valid.
-func (u *User) Login(ctx context.Context, userLogin *userpb.UserLoginRequest, loginResponse *userpb.UserLoginResponse) error {
+func (u *UserHandler) Login(ctx context.Context, userLogin *userpb.UserLoginRequest, loginResponse *userpb.UserLoginResponse) error {
 	if userLogin.UserName == "" || userLogin.Pwd == "" {
 		return status.Errorf(codes.InvalidArgument, "username and password are required")
 	}
@@ -51,7 +51,7 @@ func (u *User) Login(ctx context.Context, userLogin *userpb.UserLoginRequest, lo
 }
 
 // GetUserInfo retrieves user details based on the provided username.
-func (u *User) GetUserInfo(ctx context.Context, userInfoRequest *userpb.UserInfoRequest, userInfoResponse *userpb.UserInfoResponse) error {
+func (u *UserHandler) GetUserInfo(ctx context.Context, userInfoRequest *userpb.UserInfoRequest, userInfoResponse *userpb.UserInfoResponse) error {
 	if userInfoRequest.UserName == "" {
 		return status.Errorf(codes.InvalidArgument, "username is required")
 	}

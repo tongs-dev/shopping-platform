@@ -59,7 +59,7 @@ func main() {
 	userDataService := service.NewUserDataService(repository.NewUserRepository(db))
 
 	// 7. Register the user handler with the microservice
-	if err := userpb.RegisterUserHandler(srv.Server(), &handler.User{UserDataService: userDataService}); err != nil {
+	if err := userpb.RegisterUserHandler(srv.Server(), &handler.UserHandler{UserDataService: userDataService}); err != nil {
 		log.Fatalf("Failed to register user service: %v", err)
 	}
 
