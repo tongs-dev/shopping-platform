@@ -1,3 +1,3 @@
-package category
+package main
 
 //go:generate make proto

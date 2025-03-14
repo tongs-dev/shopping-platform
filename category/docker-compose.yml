@@ -11,5 +11,20 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  consul:
+    image: consul:1.14
+    container_name: consul
+    ports:
+      - "8500:8500"  # Expose Consul UI and API
+    environment:
+      CONSUL_BIND_INTERFACE: eth0  # Consul binds to eth0 interface
+      CONSUL_LOCAL_CONFIG: '{"leave_on_terminate": true}'  # Skip leaving when interrupting
+    volumes:
+      - consul-data:/consul/data  # Persistent storage for Consul data
+    command: "consul agent -dev -client=0.0.0.0"  # Run Consul in development mode with a client bound to all interfaces
+
 volumes:
   mysql_data:
+
+  consul-data:
+    driver: local
