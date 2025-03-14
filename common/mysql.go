@@ -6,7 +6,6 @@ import (
 	"log"
 )
 
-// 创建结构体
 type MysqlConfig struct {
 	Host     string `json:"host"`
 	User     string `json:"user"`
