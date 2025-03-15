@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: productdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  consul:
+    image: consul:1.14
+    container_name: consul
+    ports:
+      - "8500:8500"  # Expose Consul UI and API
+    environment:
+      CONSUL_BIND_INTERFACE: eth0  # Consul binds to eth0 interface
+      CONSUL_LOCAL_CONFIG: '{"leave_on_terminate": true}'  # Skip leaving when interrupting
+    volumes:
+      - consul-data:/consul/data  # Persistent storage for Consul data
+    command: "consul agent -dev -client=0.0.0.0"  # Run Consul in development mode with a client bound to all interfaces
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: always
+    ports:
+      - "6831:6831/udp"  # jaeger-agent
+      - "16686:16686"  # jaeger-query
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+
+
+volumes:
+  mysql_data:
+
+  consul-data:
+    driver: local
