@@ -8,8 +8,9 @@ The **Shopping Platform** is a microservices-based e-commerce system designed to
 - **Category Service**: Manages the categories for products, including adding, updating, deleting, and retrieving categories.
 - **gRPC Communication**: Services interact via **gRPC** for efficient communication.
 - **Consul Integration**: Uses Consul for service discovery and configuration management, ensuring that microservices can dynamically register and find each other.
-- **Dockerized Deployment**: Uses **Docker & Docker Compose** for easy setup and scaling.
+- **Tracing**: Uses **Jaeger** for distributed tracing and monitoring of service interactions.
 - **Monitoring & Logging**: Includes Prometheus, Grafana, and centralized logging for observability.
+- **Dockerized Deployment**: Uses **Docker & Docker Compose** for easy setup and scaling.
 
 ## Tech Stack
 - **Go** (Golang) for backend services
@@ -19,6 +20,7 @@ The **Shopping Platform** is a microservices-based e-commerce system designed to
 - **Docker & Docker Compose** for containerization
 - **Kubernetes (optional)** for scaling and orchestration
 - **Consul** for service discovery and configuration management
+- **Jaeger** for distributed tracing
 
 ---
 ## 🏗️ Microservices Overview
@@ -31,21 +33,24 @@ Handles authentication, user profile, and account management.
 📌 [Category Service README](./category/README.md)
 Handles category management, including creating, updating, deleting, and finding categories by different attributes like ID, name, and level. It integrates with Consul for dynamic configuration and service discovery.
 
+### **Product Service**
+📌 [Product Service README](./product/README.md)
+Handles product management, including creating, updating, deleting, and finding products. It integrates with Consul for dynamic configuration and service discovery and Jaeger for distributed tracing and monitoring of product service interactions.
+
 ---
 ## 📂 Project Structure
 ```
 shopping-platform/
 ├── common/                # Shared libraries and utilities
 ├── user/                  # User Service (Auth, Registration)
-│   ├── domain/            # Business logic and models
-│   ├── handler/           # gRPC Handlers
-│   ├── proto/             # gRPC Protobuf Definitions
-│   ├── README.md          # User Service Docs
-│   ├── main.go            # Service entry point
-│   ├── Dockerfile         # Service containerization
-│   ├── go.mod, go.sum     # Go dependencies
+│   ├── domain/
+│   ├── ...
 ├── category/              # Category Service (Categories)
-│   ├── README.md
+│   ├── domain/
+│   ├── ...
+├── product/               # Product Service (Products)
+│   ├── domain/
+│   ├── ...
 ├── docker-compose.yml     # Multi-container setup for all services
 ├── Makefile               # Build automation commands
 ├── README.md              # Shopping Platform Docs
