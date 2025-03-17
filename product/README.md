@@ -1,7 +1,9 @@
 # Product Service
 
 ## Overview
+The Product Service is a microservice that handles product management functionality for the e-commerce platform. It provides capabilities such as adding, updating, deleting, and fetching product details. This service is built using Go and gRPC for efficient communication between services.
 
+It uses MySQL for data persistence and is integrated with Consul for service discovery and Jaeger for distributed tracing.
 
 ## Project Structure
 ```
@@ -21,7 +23,7 @@ product/
 ├── Dockerfile                  # Docker Build Configuration
 ├── docker-compose.yml          # Multi-Container Setup (MySQL & Service)
 ├── main.go                     # Service Entry Point
-├── product_client.go           # 
+├── product_client.go           # Client for interacting with the product service
 ├── Makefile                    # Build Automation
 ├── go.mod                      # Dependencies
 ├── go.sum                      # Package Checksum
@@ -30,22 +32,20 @@ product/
 
 ## Features
 
-- User Registration
-- User Authentication (Login)
-- Password Hashing using bcrypt
-- MySQL Database Integration
-- gRPC for Inter-Service Communication
-- Docker and Docker Compose for containerized deployment
+- Add Product: Add a new product to the catalog with details such as name, SKU, price, and description.
+- Update Product: Update details of an existing product.
+- Delete Product: Delete a product from the catalog by its ID.
+- Find Product: Retrieve product details by ID, name, or other criteria.
+- Product Observability: Integrated with Jaeger for distributed tracing and monitoring of product service interactions.
 
 ## Technologies Used
 
-- Go (Golang)
-- gRPC (Protocol Buffers)
-- MySQL (Database)
-- GORM (ORM for Go)
-- Micro (Go Micro v2 framework for microservices)
-- Docker & Docker Compose (Containerization & Deployment)
-- Unit Testing (with mock repository & MySQL integration tests)
+- Go (Golang): Backend service implementation.
+- gRPC: Communication protocol for inter-service communication.
+- MySQL: Relational database for data storage.
+- GORM: ORM library for interacting with the MySQL database.
+- Consul: Service discovery and configuration management.
+- Jaeger: Distributed tracing for monitoring and debugging.
 
 
 ## Setup & Installation
@@ -53,7 +53,7 @@ product/
 1. Clone the Repository
 ```shell
 git clone https://github.com/your-org/shopping-platform.git
-cd shopping-platform/user
+cd shopping-platform/product
 ```
 
 2. Install Dependencies
@@ -61,29 +61,34 @@ cd shopping-platform/user
 go mod tidy
 ```
 
-3. Start MySQL & User Service using Docker
+3. Start MySQL, Consul, and Jaeger (optional)
 ```shell
 make docker-start
 ```
-This will start MySQL and the User Service.
 
-4. Stop docker containers
+4. Setup Mysql Config in Consul
+In Consul, create new Key/Value pair in `/micro/config` folder
+```json
+{
+  "host": "127.0.0.1",
+  "user":"root",
+  "pwd": "123456",
+  "database":"productdb",
+  "port": 3306
+}
+```
+
+5. Stop docker containers
 ```shell
 make docker-stop
 ```
 
 ## Running the Service
 
-1. Locally (without Docker)
+Locally (without Docker)
 ```shell
-docker-compose up -d mysql
-go run main.go
-```
-
-2. Inside Docker
-```shell
-make docker-build
 make docker-start
+go run main.go
 ```
 
 ## Running Tests
@@ -119,7 +124,7 @@ make proto
 
 To initialize the database schema, uncomment the following in main.go and run:
 ```go
-// userRepo := repository.NewUserRepository(db)
-// err = userRepo.InitTable()
+// productRepo := repository.NewUserRepository(db)
+// err = productRepo.InitTable()
 ```
 Run the service, then comment it back once tables are created.
